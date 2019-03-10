@@ -13,7 +13,6 @@ var lunge_cooldown = LUNGE_COOLDOWN_TIME
 
 var host
 
-
 func _physics_process(delta):
 	if not is_input_blocked:
 		move(delta)
@@ -37,16 +36,26 @@ func lunge():
 
 
 func lunge_move(delta):
+	if lunge_dir == Vector2.ZERO:
+		stop_lunge()
+		return
 	var vel = lunge_dir * LUNGE_SPEED * delta
-	print(vel)
 	var col = move_and_collide(vel)
 	if col:
 		stop_lunge()
-		if col.collider.is_in_group("npc"):
+		if col.collider.is_in_group("crew"):
 			host = col.collider
 			get_node("col").set_disabled(true)
 			set_visible(false)
 			set_global_transform(host.get_global_transform())
+
+
+func stop_lunge():
+	is_input_blocked = false
+	is_lunging = false
+	lunge_time = 0
+	lunge_cooldown = 0
+	set_collision_mask_bit(1, true)
 
 
 func release_host():
@@ -60,21 +69,29 @@ func release_host():
 	set_visible(true)
 
 
-func stop_lunge():
-	is_input_blocked = false
-	is_lunging = false
-	lunge_time = 0
-	lunge_cooldown = 0
-	set_collision_mask_bit(1, true)
-
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
 		if event.scancode == KEY_SPACE:
-			if host:
+			print(is_behind_crew())
+			if host and is_behind_crew():
+				print("Stabby time")
+				host.get_node("front").get_overlapping_bodies()[0].die()
+			elif host:
 				release_host()
 			else:
 				lunge()
 
+
+func is_behind_crew():
+	if not host:
+		return
+	var bodies = host.get_node("front").get_overlapping_bodies()
+	for body in bodies:
+		if body == host:
+			continue
+		if body.is_in_group("crew"):
+			if not body.is_dead():
+				return true
 
 func move(delta):
 	var dir = get_input_dir()

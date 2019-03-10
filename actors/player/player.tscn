@@ -7,11 +7,8 @@
 extents = Vector2( 32, 32 )
 
 [node name="player" type="KinematicBody2D"]
-position = Vector2( 259.013, 272.045 )
+position = Vector2( 258.829, 274.069 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_group_": true
-}
 
 [node name="Sprite" type="Sprite" parent="."]
 modulate = Color( 0.00784314, 1, 0, 1 )
