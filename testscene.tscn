@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://actors/player/player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://actors/crew/crew.tscn" type="PackedScene" id=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="player" parent="." instance=ExtResource( 1 )]
+collision_mask = 3
+
+[node name="crew" parent="." groups=[
+"npc",
+] instance=ExtResource( 2 )]
+position = Vector2( 451.188, 276.901 )
+collision_layer = 2
+collision_mask = 0
+
