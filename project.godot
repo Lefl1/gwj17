@@ -17,6 +17,7 @@ _global_script_class_icons={
 
 config/name="GWJ7"
 boot_splash/image="res://textures/boot_splash.png"
+boot_splash/bg_color=Color( 0.0470588, 0.113725, 0.156863, 1 )
 config/icon="res://icon.png"
 
 [rendering]
