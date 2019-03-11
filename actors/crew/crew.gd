@@ -3,8 +3,12 @@ extends KinematicBody2D
 var dead = false
 var alarmed = false
 
-enum {IDLE, MOVING, INTERACTING}
+enum Roles {CAPTAIN, ENGINEER, COOK, ANALYST}
+export (Roles) var role
+enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED}
 var status = IDLE
+const MAX_STUN_TIME = 3
+var stun_time = 0
 var idle_time = 0
 var time_to_interact
 var int_time = 0
@@ -23,6 +27,27 @@ const SPEED = 100
 onready var navigation = get_node("/root/world/navigation")
 onready var tilemap = navigation.get_node("tilemap")
 var path
+enum {NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST}
+const MAX_CARDDIR = 7
+const directions_dict = {
+	NORTH: 0, NORTHEAST: 45,
+	EAST: 90, SOUTHEAST: 135,
+	SOUTH: 180, SOUTHWEST: 225,
+	WEST: 270, NORTHWEST: 315}
+const cardinal_margin = 0.2
+const MAX_TURN_TIME = 0.5
+var turn_time = 0
+var turns = 0
+var current_direction = NORTH
+
+onready var player = get_node("/root/world/player")
+onready var view = get_node("view")
+var last_player_pos = Vector2()
+
+
+func _ready():
+	print(directions_dict)
+
 
 func die():
 	get_node("Sprite").set_modulate(Color(0, 0, 0))
@@ -37,23 +62,49 @@ func _on_view_body_entered(body):
 		if not body in known_casualties:
 			alarmed = true
 			known_casualties.append()
+	elif body.is_in_group("player") and not body.host and not (status == STUNNED or status == POSSESSED):
+		if has_line_of_sight(body):
+			alarmed = true
+			status = HUNTING
+			_update_navigation_path(get_global_position(), body.get_global_position())
 
 
 func _process(delta):
+	if status == POSSESSED:
+		return
+	elif status == STUNNED:
+		stun_time += delta
+		if stun_time >= MAX_STUN_TIME:
+			stun_time = 0
+		else:
+			return
+
+	last_player_pos = player.get_global_position()
+
 	# Get the distance we have to travel this frame
-	var cs = status
+	var last_position = get_global_position()
 	if path and not path.size() == 0:
 		var walk_distance = SPEED * delta
-		move(walk_distance)
-		status = MOVING
+		if not (status == HUNTING and get_global_position().distance_to(player.get_global_position()) < 200):
+			move(walk_distance)
+		if not status == HUNTING:
+			status = MOVING
 	else:
 		if int_tile and not status == INTERACTING:
 			status = INTERACTING
 			# TODO: randomize this
 			time_to_interact = interaction_times[int_object]
-			print(status)
-		elif not int_tile:
+		elif not int_tile and not status == HUNTING:
 			status = IDLE
+
+	var current_position = get_global_position()
+	var dir = (current_position -last_position).normalized()
+
+	var cardinal_dir = get_rotation_from_dir(dir)
+	if dir:
+		rotate_to_direction(cardinal_dir)
+	elif status == INTERACTING:
+		rotate_to_direction(NORTH)
 
 	if status == IDLE:
 		get_interaction_tile()
@@ -65,8 +116,97 @@ func _process(delta):
 			reset_interact_vars()
 			status = IDLE
 
-	if cs != status:
-		get_node("status").set_text("STATUS: %s" % status)
+	elif status == HUNTING:
+		var bodies = view.get_overlapping_bodies()
+		if player in bodies and not player.host:
+			_update_navigation_path(get_global_position(), player.get_global_position())
+			turn_time = 0
+			turns = 0
+		else:
+			if turn_time >= MAX_TURN_TIME:
+				turn_time = 0
+				var right = view.get_global_transform().x
+				var dtp = (player.get_global_position() - get_global_position()).normalized()
+				var turn_dir = sign(dtp.dot(right))
+				rotate_to_direction(current_direction + turn_dir)
+				turns += 1
+				if turns >= 4:
+					turns = 0
+					status = IDLE
+
+	turn_time += delta
+	get_node("status").set_text("STATUS: %s" % status)
+
+
+func get_dir(dir):
+	# Check cardinal directions clockwise.
+	# Sucks but I can't figure out a better direction right now
+	# Dot to north vector
+	var dot = dir.dot(Vector2(0, -1))
+	var direction = null
+	if dot > 0:
+		direction = NORTH
+	elif dot < 0:
+		direction = SOUTH
+
+	# Dot to east vector
+	dot = dir.dot(Vector2(1, 0))
+	# Check eastern directions
+	if dot > 0:
+		if direction == NORTH:
+			direction = NORTHEAST
+		elif direction == SOUTH:
+			direction = SOUTHEAST
+		else:
+			direction = EAST
+
+	# Check western directions
+	elif dot < 0:
+		if direction == NORTH:
+			direction = NORTHWEST
+		elif direction == SOUTH:
+			direction = SOUTHWEST
+		else:
+			direction = WEST
+
+
+func rotate_to_direction(dir):
+	if dir < 0:
+		dir = MAX_CARDDIR + dir
+	elif dir > MAX_CARDDIR:
+		dir = dir - MAX_CARDDIR
+
+	# WTF why is this being converted to a string???.
+	var rot = directions_dict[int(dir)]
+	view.set_rotation_degrees(rot)
+	current_direction = dir
+
+
+func get_rotation_from_dir(dir):
+	var cardinal_margin = 0.2
+	var direction = 0
+
+	if dir.y > 0 and dir.y > cardinal_margin:
+		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+			direction = SOUTH
+		elif dir.x > cardinal_margin:
+			direction = SOUTHEAST
+		elif dir.x < -cardinal_margin:
+			direction = SOUTHWEST
+
+	elif dir.y < 0 and dir.y < -cardinal_margin:
+		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+			direction = NORTH
+		elif dir.x > cardinal_margin:
+			direction = NORTHEAST
+		elif dir.x < -cardinal_margin:
+			direction = NORTHWEST
+	elif dir.x > 0:
+		direction = EAST
+	elif dir.x < 0:
+		direction = WEST
+
+	return direction
 
 
 func get_interaction_tile():
@@ -143,6 +283,19 @@ func move(distance):
 		distance -= d
 		current_position = path[0]
 		path.remove(0)
+
+
+func has_line_of_sight(entity):
+	var cpos = get_global_position()
+	var epos = entity.get_global_position()
+	var res = cast_ray(cpos, epos)
+	if res and res.collider == entity:
+		return true
+
+
+func cast_ray(from, to):
+	var space_state = get_world_2d().get_direct_space_state()
+	return space_state.intersect_ray(from, to, [self.get_rid()])
 
 
 func _update_navigation_path(from, to):
