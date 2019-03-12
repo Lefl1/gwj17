@@ -91,19 +91,28 @@ func release_host():
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
 		if event.scancode == KEY_SPACE:
-			if host and is_behind_crew() and not is_input_blocked:
+			if is_behind_crew() and not is_input_blocked:
 				print("Stabby time")
-				host.get_node("front").get_overlapping_bodies()[0].die()
-			elif host and not is_input_blocked:
+				if host:
+					var target = host.get_node("view/front").get_overlapping_bodies()[0]
+					if target == host:
+						target = host.get_node("view/front").get_overlapping_bodies()[1]
+					target.die()
+				else:
+					get_node("front").get_overlapping_bodies()[0].die()
+			elif not is_behind_crew() and host and not is_input_blocked:
 				release_host()
 			elif not is_input_blocked:
 				lunge()
 
 
 func is_behind_crew():
-	if not host:
-		return
-	var bodies = host.get_node("front").get_overlapping_bodies()
+	var bodies
+	if host:
+		bodies = host.get_node("view/front").get_overlapping_bodies()
+	else:
+		bodies = get_node("front").get_overlapping_bodies()
+		
 	for body in bodies:
 		if body == host:
 			continue
@@ -115,14 +124,13 @@ func is_behind_crew():
 
 func move(delta):
 	var dir = get_input_dir()
-
 	if host:
 		if dir != Vector2.ZERO:
 			host.rotate_to_vdir(dir)
 		host.move_and_slide(dir.normalized() * SPEED)
 	else:
-		# Also rotate!
-		move_and_slide(dir.normalized() * SPEED)
+		get_node("front").look_at(get_global_position() + dir)
+		move_and_slide(dir * SPEED)
 
 
 func get_rotation_from_dir(dir):
