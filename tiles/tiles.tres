@@ -1,9 +1,14 @@
-[gd_resource type="TileSet" load_steps=3 format=2]
+[gd_resource type="TileSet" load_steps=4 format=2]
 
 [ext_resource path="res://textures/grid Tiles-01.png" type="Texture" id=1]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 24.3478, 23.7181 )
+
+[sub_resource type="NavigationPolygon" id=2]
+vertices = PoolVector2Array( 25, -25, 25, 25, -25, 25, -25, -25 )
+polygons = [ PoolIntArray( 0, 1, 2, 3 ) ]
+outlines = [ PoolVector2Array( -25, -25, -25, 25, 25, 25, 25, -25 ) ]
 
 [resource]
 0/name = "wall"
@@ -462,6 +467,7 @@ extents = Vector2( 24.3478, 23.7181 )
 28/tile_mode = 0
 28/occluder_offset = Vector2( 25, 25 )
 28/navigation_offset = Vector2( 25, 25 )
+28/navigation = SubResource( 2 )
 28/shapes = [  ]
 28/z_index = 0
 29/name = "floor2"
@@ -472,6 +478,7 @@ extents = Vector2( 24.3478, 23.7181 )
 29/tile_mode = 0
 29/occluder_offset = Vector2( 25, 25 )
 29/navigation_offset = Vector2( 25, 25 )
+29/navigation = SubResource( 2 )
 29/shapes = [  ]
 29/z_index = 0
 30/name = "floor3"
@@ -482,6 +489,7 @@ extents = Vector2( 24.3478, 23.7181 )
 30/tile_mode = 0
 30/occluder_offset = Vector2( 25, 25 )
 30/navigation_offset = Vector2( 25, 25 )
+30/navigation = SubResource( 2 )
 30/shapes = [  ]
 30/z_index = 0
 31/name = "floor4"
@@ -492,6 +500,7 @@ extents = Vector2( 24.3478, 23.7181 )
 31/tile_mode = 0
 31/occluder_offset = Vector2( 25, 25 )
 31/navigation_offset = Vector2( 25, 25 )
+31/navigation = SubResource( 2 )
 31/shapes = [  ]
 31/z_index = 0
 32/name = "floor5"
@@ -502,6 +511,7 @@ extents = Vector2( 24.3478, 23.7181 )
 32/tile_mode = 0
 32/occluder_offset = Vector2( 25, 25 )
 32/navigation_offset = Vector2( 25, 25 )
+32/navigation = SubResource( 2 )
 32/shapes = [  ]
 32/z_index = 0
 33/name = "floor6"
@@ -512,6 +522,7 @@ extents = Vector2( 24.3478, 23.7181 )
 33/tile_mode = 0
 33/occluder_offset = Vector2( 25, 25 )
 33/navigation_offset = Vector2( 25, 25 )
+33/navigation = SubResource( 2 )
 33/shapes = [  ]
 33/z_index = 0
 34/name = "floor7"
@@ -522,6 +533,7 @@ extents = Vector2( 24.3478, 23.7181 )
 34/tile_mode = 0
 34/occluder_offset = Vector2( 25, 25 )
 34/navigation_offset = Vector2( 25, 25 )
+34/navigation = SubResource( 2 )
 34/shapes = [  ]
 34/z_index = 0
 35/name = "floor8"
@@ -532,6 +544,7 @@ extents = Vector2( 24.3478, 23.7181 )
 35/tile_mode = 0
 35/occluder_offset = Vector2( 25, 25 )
 35/navigation_offset = Vector2( 25, 25 )
+35/navigation = SubResource( 2 )
 35/shapes = [  ]
 35/z_index = 0
 36/name = "floor9"
@@ -542,6 +555,7 @@ extents = Vector2( 24.3478, 23.7181 )
 36/tile_mode = 0
 36/occluder_offset = Vector2( 25, 25 )
 36/navigation_offset = Vector2( 25, 25 )
+36/navigation = SubResource( 2 )
 36/shapes = [  ]
 36/z_index = 0
 37/name = "blue door"
