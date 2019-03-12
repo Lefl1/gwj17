@@ -63,7 +63,7 @@ func change_state(state):
 	if status == DEAD:
 		return
 	status = state
-	if state == IDLE or state == HUNTING or state == STUNNED or state == POSSESSED or state == DEAD or ALARMED:
+	if state == IDLE or state == HUNTING or state == STUNNED or state == POSSESSED or state == DEAD or state == ALARMED:
 		reset_interact_vars()
 	get_node("status").set_text("STATUS: %s" % status)
 	if state == ALARMED:
@@ -98,6 +98,7 @@ func _process(delta):
 
 	# Get the distance we have to travel this frame
 	var last_position = get_global_position()
+
 	if path and not path.size() == 0:
 		var walk_distance = SPEED * delta
 		if not (status == HUNTING or status == ALARMED and get_global_position().distance_to(player.get_global_position()) < 200):
@@ -109,9 +110,9 @@ func _process(delta):
 			change_state(MOVING)
 	else:
 		if int_tile and not status == INTERACTING:
-			change_state(INTERACTING)
 			# TODO: randomize this
 			time_to_interact = interaction_times[int_object]
+			change_state(INTERACTING)
 		elif not int_tile and not (status == HUNTING or status == ALARMED):
 			change_state(IDLE)
 
