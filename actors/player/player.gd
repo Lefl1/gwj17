@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-const SPEED = 75
+const SPEED = 125
 var is_input_blocked = false
 
 var is_lunging = false
