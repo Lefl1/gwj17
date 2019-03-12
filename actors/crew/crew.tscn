@@ -10,10 +10,13 @@ extents = Vector2( 32, 32 )
 extents = Vector2( 32, 16 )
 
 [node name="crew" type="KinematicBody2D"]
+collision_layer = 4
 script = ExtResource( 1 )
 usable_tiles = PoolStringArray( "computer" )
 
 [node name="view" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="view"]
 polygon = PoolVector2Array( -32, 0, -125, -200, -150, -300, 150, -300, 125, -200, 32, 0 )
