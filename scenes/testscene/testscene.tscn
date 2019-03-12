@@ -20,6 +20,7 @@ special_tiles = PoolStringArray( "computer" )
 
 [node name="player" parent="." groups=[
 "player",
+<<<<<<< HEAD
 ] instance=ExtResource( 3 )]
 collision_mask = 3
 
@@ -30,4 +31,20 @@ position = Vector2( 598.159, 241.608 )
 collision_layer = 2
 collision_mask = 2
 usable_tiles = PoolStringArray( "box" )
+=======
+] instance=ExtResource( 4 )]
+position = Vector2( 158.829, 48.8064 )
+collision_layer = 2
+collision_mask = 7
+
+[node name="crew" parent="." groups=[
+"crew",
+] instance=ExtResource( 5 )]
+position = Vector2( 592.278, 281.303 )
+
+[node name="crew2" parent="." groups=[
+"crew",
+] instance=ExtResource( 5 )]
+position = Vector2( 861.879, 124.104 )
+>>>>>>> master
 

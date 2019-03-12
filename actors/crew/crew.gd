@@ -1,11 +1,12 @@
 extends KinematicBody2D
 
 var dead = false
-var alarmed = false
 
 enum Roles {CAPTAIN, ENGINEER, COOK, ANALYST}
 export (Roles) var role
-enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED}
+enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED, DEAD, ALARMED}
+var alarmed_time = 0
+const MAX_ALARMED_TIME = 10
 var status = IDLE
 const MAX_STUN_TIME = 3
 var stun_time = 0
@@ -38,6 +39,7 @@ const cardinal_margin = 0.2
 const MAX_TURN_TIME = 0.5
 var turn_time = 0
 var turns = 0
+var turn_dir = 1
 var current_direction = NORTH
 
 onready var player = get_node("/root/world/player")
@@ -45,27 +47,40 @@ onready var view = get_node("view")
 var last_player_pos = Vector2()
 
 
-func _ready():
-	print(directions_dict)
-
-
 func die():
+	dead = true
 	get_node("Sprite").set_modulate(Color(0, 0, 0))
-	print("IM DEAD")
+	change_state(DEAD)
+	set_collision_layer_bit(2, false)
+	set_collision_layer_bit(3, true)
+	set_z_index(-1)
+	set_process(false)
 
 func is_dead():
 	return dead
 
+func change_state(state):
+	if status == DEAD:
+		return
+	status = state
+	if state == IDLE or state == HUNTING or state == STUNNED or state == POSSESSED or state == DEAD or ALARMED:
+		reset_interact_vars()
+	get_node("status").set_text("STATUS: %s" % status)
+	if state == ALARMED:
+		path = null
+
 func _on_view_body_entered(body):
 	# If we se a dead body, be alarmed bout it if we have not seen it before
 	if body.is_in_group("crew") and body.is_dead():
+		if body == self:
+			return
 		if not body in known_casualties:
-			alarmed = true
-			known_casualties.append()
+			change_state(ALARMED)
+			known_casualties.append(body)
+
 	elif body.is_in_group("player") and not body.host and not (status == STUNNED or status == POSSESSED):
 		if has_line_of_sight(body):
-			alarmed = true
-			status = HUNTING
+			change_state(HUNTING)
 			_update_navigation_path(get_global_position(), body.get_global_position())
 
 
@@ -85,17 +100,20 @@ func _process(delta):
 	var last_position = get_global_position()
 	if path and not path.size() == 0:
 		var walk_distance = SPEED * delta
-		if not (status == HUNTING and get_global_position().distance_to(player.get_global_position()) < 200):
+		if not (status == HUNTING or status == ALARMED and get_global_position().distance_to(player.get_global_position()) < 200):
 			move(walk_distance)
-		if not status == HUNTING:
-			status = MOVING
+		elif status == HUNTING:
+			var dtp = (player.get_global_position() - get_global_position()).normalized()
+			rotate_to_vdir(dtp)
+		if not (status == HUNTING or status == ALARMED):
+			change_state(MOVING)
 	else:
 		if int_tile and not status == INTERACTING:
-			status = INTERACTING
+			change_state(INTERACTING)
 			# TODO: randomize this
 			time_to_interact = interaction_times[int_object]
-		elif not int_tile and not status == HUNTING:
-			status = IDLE
+		elif not int_tile and not (status == HUNTING or status == ALARMED):
+			change_state(IDLE)
 
 	var current_position = get_global_position()
 	var dir = (current_position -last_position).normalized()
@@ -114,7 +132,7 @@ func _process(delta):
 		int_time += delta
 		if int_time >= time_to_interact:
 			reset_interact_vars()
-			status = IDLE
+			change_state(IDLE)
 
 	elif status == HUNTING:
 		var bodies = view.get_overlapping_bodies()
@@ -125,49 +143,27 @@ func _process(delta):
 		else:
 			if turn_time >= MAX_TURN_TIME:
 				turn_time = 0
-				var right = view.get_global_transform().x
-				var dtp = (player.get_global_position() - get_global_position()).normalized()
-				var turn_dir = sign(dtp.dot(right))
+				if turns == 0:
+					var right = view.get_global_transform().x
+					var dtp = (player.get_global_position() - get_global_position()).normalized()
+					turn_dir = sign(dtp.dot(right))
 				rotate_to_direction(current_direction + turn_dir)
 				turns += 1
 				if turns >= 4:
 					turns = 0
-					status = IDLE
+					change_state(IDLE)
 
 	turn_time += delta
-	get_node("status").set_text("STATUS: %s" % status)
+	if status == ALARMED:
+		alarmed_time += delta
+		if alarmed_time >= MAX_ALARMED_TIME:
+			alarmed_time = 0
+			change_state(IDLE)
 
 
-func get_dir(dir):
-	# Check cardinal directions clockwise.
-	# Sucks but I can't figure out a better direction right now
-	# Dot to north vector
-	var dot = dir.dot(Vector2(0, -1))
-	var direction = null
-	if dot > 0:
-		direction = NORTH
-	elif dot < 0:
-		direction = SOUTH
-
-	# Dot to east vector
-	dot = dir.dot(Vector2(1, 0))
-	# Check eastern directions
-	if dot > 0:
-		if direction == NORTH:
-			direction = NORTHEAST
-		elif direction == SOUTH:
-			direction = SOUTHEAST
-		else:
-			direction = EAST
-
-	# Check western directions
-	elif dot < 0:
-		if direction == NORTH:
-			direction = NORTHWEST
-		elif direction == SOUTH:
-			direction = SOUTHWEST
-		else:
-			direction = WEST
+func rotate_to_vdir(vdir):
+	var cdir = get_rotation_from_dir(vdir)
+	rotate_to_direction(cdir)
 
 
 func rotate_to_direction(dir):
@@ -236,10 +232,8 @@ func find_closest_interaction_tile():
 			var bd
 
 			for tile in interaction_tiles:
-				print(self.name + " " + str(tile))
 				# If the tile is currently in use by another npc we can not use it.
 				if tile in tilemap.tiles_in_use:
-					print("tile in use")
 					continue
 
 				# If best tile_is null choose the first that is available
@@ -259,11 +253,11 @@ func find_closest_interaction_tile():
 func reset_interact_vars():
 	tilemap.unlock_tile(self, int_tile)
 	int_time = 0
-	status == IDLE
 	int_time = 0
 	int_object = null
 	# do not use the same tile twice
-	int_blacklist = int_tile
+	if int_tile:
+		int_blacklist = int_tile
 	int_tile = Vector2()
 
 
