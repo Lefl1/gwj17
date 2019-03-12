@@ -5,7 +5,7 @@ var alarmed = false
 
 enum Roles {CAPTAIN, ENGINEER, COOK, ANALYST}
 export (Roles) var role
-enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED}
+enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED, DEAD}
 var status = IDLE
 const MAX_STUN_TIME = 3
 var stun_time = 0
@@ -51,10 +51,22 @@ func _ready():
 
 func die():
 	get_node("Sprite").set_modulate(Color(0, 0, 0))
+	change_state(DEAD)
+	set_process(false)
 	print("IM DEAD")
 
 func is_dead():
 	return dead
+
+func change_state(state):
+	status = state
+	if state == IDLE or state == HUNTING or state == STUNNED or state == POSSESSED or state == DEAD:
+		reset_interact_vars()
+	if state == POSSESSED:
+		print(status)
+
+	get_node("status").set_text("STATUS: %s" % status)
+
 
 func _on_view_body_entered(body):
 	# If we se a dead body, be alarmed bout it if we have not seen it before
@@ -65,7 +77,7 @@ func _on_view_body_entered(body):
 	elif body.is_in_group("player") and not body.host and not (status == STUNNED or status == POSSESSED):
 		if has_line_of_sight(body):
 			alarmed = true
-			status = HUNTING
+			change_state(HUNTING)
 			_update_navigation_path(get_global_position(), body.get_global_position())
 
 
@@ -88,14 +100,14 @@ func _process(delta):
 		if not (status == HUNTING and get_global_position().distance_to(player.get_global_position()) < 200):
 			move(walk_distance)
 		if not status == HUNTING:
-			status = MOVING
+			change_state(MOVING)
 	else:
 		if int_tile and not status == INTERACTING:
-			status = INTERACTING
+			change_state(INTERACTING)
 			# TODO: randomize this
 			time_to_interact = interaction_times[int_object]
 		elif not int_tile and not status == HUNTING:
-			status = IDLE
+			change_state(IDLE)
 
 	var current_position = get_global_position()
 	var dir = (current_position -last_position).normalized()
@@ -114,7 +126,7 @@ func _process(delta):
 		int_time += delta
 		if int_time >= time_to_interact:
 			reset_interact_vars()
-			status = IDLE
+			change_state(IDLE)
 
 	elif status == HUNTING:
 		var bodies = view.get_overlapping_bodies()
@@ -132,42 +144,14 @@ func _process(delta):
 				turns += 1
 				if turns >= 4:
 					turns = 0
-					status = IDLE
+					change_state(IDLE)
 
 	turn_time += delta
-	get_node("status").set_text("STATUS: %s" % status)
 
 
-func get_dir(dir):
-	# Check cardinal directions clockwise.
-	# Sucks but I can't figure out a better direction right now
-	# Dot to north vector
-	var dot = dir.dot(Vector2(0, -1))
-	var direction = null
-	if dot > 0:
-		direction = NORTH
-	elif dot < 0:
-		direction = SOUTH
-
-	# Dot to east vector
-	dot = dir.dot(Vector2(1, 0))
-	# Check eastern directions
-	if dot > 0:
-		if direction == NORTH:
-			direction = NORTHEAST
-		elif direction == SOUTH:
-			direction = SOUTHEAST
-		else:
-			direction = EAST
-
-	# Check western directions
-	elif dot < 0:
-		if direction == NORTH:
-			direction = NORTHWEST
-		elif direction == SOUTH:
-			direction = SOUTHWEST
-		else:
-			direction = WEST
+func rotate_to_vdir(vdir):
+	var cdir = get_rotation_from_dir(vdir)
+	rotate_to_direction(cdir)
 
 
 func rotate_to_direction(dir):
@@ -259,11 +243,11 @@ func find_closest_interaction_tile():
 func reset_interact_vars():
 	tilemap.unlock_tile(self, int_tile)
 	int_time = 0
-	status == IDLE
 	int_time = 0
 	int_object = null
 	# do not use the same tile twice
-	int_blacklist = int_tile
+	if int_tile:
+		int_blacklist = int_tile
 	int_tile = Vector2()
 
 
