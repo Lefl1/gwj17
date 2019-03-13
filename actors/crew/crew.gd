@@ -53,11 +53,14 @@ func die():
 	change_state(DEAD)
 	set_collision_layer_bit(2, false)
 	set_collision_layer_bit(3, true)
+	set_collision_mask_bit(0, false)
 	set_z_index(-1)
 	set_process(false)
 
+
 func is_dead():
 	return dead
+
 
 func change_state(state):
 	if status == DEAD:
