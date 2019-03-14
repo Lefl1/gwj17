@@ -349,6 +349,7 @@ editor/display_folded = true
 shape = SubResource( 1 )
 
 [node name="screen" type="Sprite" parent="."]
+editor/display_folded = true
 texture = ExtResource( 1 )
 region_enabled = true
 region_rect = Rect2( 450, 250, 50, 50 )
