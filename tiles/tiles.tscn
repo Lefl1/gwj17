@@ -348,6 +348,18 @@ editor/display_folded = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="box/StaticBody2D"]
 shape = SubResource( 1 )
 
+[node name="fake_box" type="Sprite" parent="."]
+editor/display_folded = true
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 400, 250, 50, 50 )
+
+[node name="StaticBody2D" type="StaticBody2D" parent="fake_box"]
+editor/display_folded = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="fake_box/StaticBody2D"]
+shape = SubResource( 1 )
+
 [node name="screen" type="Sprite" parent="."]
 editor/display_folded = true
 texture = ExtResource( 1 )
@@ -489,10 +501,18 @@ region_rect = Rect2( 350, 200, 50, 100 )
 
 [node name="Navigation2D" type="Navigation2D" parent="red doorclosed"]
 
-[node name="door base" type="Sprite" parent="."]
+[node name="door_base_blue" type="Sprite" parent="."]
 texture = ExtResource( 1 )
 region_enabled = true
 region_rect = Rect2( 300, 0, 50, 100 )
 
-[node name="Navigation2D" type="Navigation2D" parent="door base"]
+[node name="door_base_yellow" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 300, 0, 50, 100 )
+
+[node name="door_base_red" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 300, 0, 50, 100 )
 
