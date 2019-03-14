@@ -1,0 +1,51 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://actors/crew/crew.gd" type="Script" id=1]
+[ext_resource path="res://icon.png" type="Texture" id=2]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 32, 16 )
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 32, 32 )
+
+[node name="crew" type="KinematicBody2D" groups=[
+"crew",
+]]
+collision_layer = 4
+script = ExtResource( 1 )
+usable_tiles = PoolStringArray( "box" )
+
+[node name="view" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 10
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="view"]
+polygon = PoolVector2Array( -32, 0, -125, -200, -150, -300, 150, -300, 125, -200, 32, 0 )
+
+[node name="front" type="Area2D" parent="view"]
+position = Vector2( 0, 0.25 )
+collision_layer = 3
+collision_mask = 11
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="view/front"]
+position = Vector2( 0, -48 )
+shape = SubResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+modulate = Color( 1, 0, 0, 1 )
+texture = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 2 )
+
+[node name="status" type="Label" parent="."]
+margin_left = -34.3419
+margin_top = -46.238
+margin_right = 12.6581
+margin_bottom = -32.238
+text = "STATUS"
+align = 1
+valign = 1
+
+[connection signal="body_entered" from="view" to="." method="_on_view_body_entered"]

@@ -1,13 +1,139 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://actors/crew/crew.gd" type="Script" id=1]
-[ext_resource path="res://icon.png" type="Texture" id=2]
+[ext_resource path="res://textures/walk-cycle.png" type="Texture" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 16 )
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 32, 32 )
+
+[sub_resource type="Animation" id=5]
+resource_name = "Walk Down"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ Rect2( 0, 600, 300, 300 ), Rect2( 300, 600, 300, 300 ), Rect2( 0, 600, 300, 300 ), Rect2( 600, 600, 300, 300 ), Rect2( 0, 600, 300, 300 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ 0.0, -5.0, 0.0, 5.0, 0.0 ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "Walk L"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ Rect2( 0, 300, 300, 300 ), Rect2( 300, 300, 300, 300 ), Rect2( 0, 300, 300, 300 ), Rect2( 600, 300, 300, 300 ), Rect2( 0, 300, 300, 300 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ 0.0, -5.0, 0.0, 5.0, 0.0 ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "Walk R"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ Rect2( 0, 0, 300, 300 ), Rect2( 300, 0, 300, 300 ), Rect2( 0, 0, 300, 300 ), Rect2( 600, 0, 300, 300 ), Rect2( 0, 0, 300, 300 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ 0.0, 5.0, 0.0, -5.0, 0.0 ]
+}
+
+[sub_resource type="Animation" id=6]
+resource_name = "Walk Up"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.5, 0.8, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ Rect2( 0, 900, 300, 300 ), Rect2( 300, 900, 300, 300 ), Rect2( 0, 900, 300, 300 ), Rect2( 600, 900, 300, 300 ), Rect2( 0, 900, 300, 300 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.5, 0.7, 1 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 2,
+"values": [ 0.0, -5.0, 0.0, 5.0, 0.0 ]
+}
+
+[sub_resource type="Animation" id=7]
+resource_name = "death"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:region_rect")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 0.6, 0.9 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 2,
+"values": [ Rect2( 900, 0, 300, 300 ), Rect2( 900, 300, 300, 300 ), Rect2( 900, 600, 300, 300 ), Rect2( 900, 900, 300, 300 ) ]
+}
 
 [node name="crew" type="KinematicBody2D" groups=[
 "crew",
@@ -32,20 +158,30 @@ collision_mask = 11
 position = Vector2( 0, -48 )
 shape = SubResource( 1 )
 
-[node name="Sprite" type="Sprite" parent="."]
-modulate = Color( 1, 0, 0, 1 )
-texture = ExtResource( 2 )
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 2 )
 
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( -1.20551e-008, -18.19 )
+scale = Vector2( 0.332506, 0.332506 )
+texture = ExtResource( 2 )
+region_enabled = true
+region_rect = Rect2( 900, 900, 300, 300 )
+
 [node name="status" type="Label" parent="."]
-margin_left = -34.3419
-margin_top = -46.238
-margin_right = 12.6581
-margin_bottom = -32.238
+margin_left = -36.4369
+margin_top = -76.9648
+margin_right = 10.5631
+margin_bottom = -62.9648
 text = "STATUS"
 align = 1
 valign = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+"anims/Walk Down" = SubResource( 5 )
+"anims/Walk L" = SubResource( 4 )
+"anims/Walk R" = SubResource( 3 )
+"anims/Walk Up" = SubResource( 6 )
+anims/death = SubResource( 7 )
 
 [connection signal="body_entered" from="view" to="." method="_on_view_body_entered"]
