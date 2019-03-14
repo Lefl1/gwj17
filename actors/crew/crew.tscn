@@ -167,7 +167,7 @@ position = Vector2( -1.20551e-008, -18.19 )
 scale = Vector2( 0.332506, 0.332506 )
 texture = ExtResource( 2 )
 region_enabled = true
-region_rect = Rect2( 900, 900, 300, 300 )
+region_rect = Rect2( 0, 600, 300, 300 )
 
 [node name="status" type="Label" parent="."]
 margin_left = -36.4369
