@@ -1,13 +1,13 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://actors/crew/crew.gd" type="Script" id=1]
-[ext_resource path="res://icon.png" type="Texture" id=2]
+[ext_resource path="res://textures/crew/red/animations.tres" type="SpriteFrames" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 16 )
 
-[sub_resource type="RectangleShape2D" id=2]
-extents = Vector2( 32, 32 )
+[sub_resource type="CircleShape2D" id=2]
+radius = 24.0
 
 [node name="crew" type="KinematicBody2D" groups=[
 "crew",
@@ -17,6 +17,7 @@ script = ExtResource( 1 )
 usable_tiles = PoolStringArray( "box" )
 
 [node name="view" type="Area2D" parent="."]
+editor/display_folded = true
 collision_layer = 4
 collision_mask = 10
 
@@ -32,12 +33,14 @@ collision_mask = 11
 position = Vector2( 0, -48 )
 shape = SubResource( 1 )
 
-[node name="Sprite" type="Sprite" parent="."]
-modulate = Color( 1, 0, 0, 1 )
-texture = ExtResource( 2 )
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 2 )
+
+[node name="AnimatedSprite" type="AnimatedSprite" parent="."]
+scale = Vector2( 0.375, 0.375 )
+frames = ExtResource( 2 )
+animation = "walk_down"
+offset = Vector2( 20, -50 )
 
 [node name="status" type="Label" parent="."]
 margin_left = -34.3419

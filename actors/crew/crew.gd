@@ -2,7 +2,7 @@ extends KinematicBody2D
 
 var dead = false
 
-enum Roles {CAPTAIN, ENGINEER, COOK, ANALYST}
+enum Roles {CAPTAIN, ENGINEER, ANALYST}
 export (Roles) var role
 enum {IDLE, MOVING, INTERACTING, HUNTING, POSSESSED, STUNNED, DEAD, ALARMED}
 var alarmed_time = 0
@@ -26,7 +26,7 @@ const interaction_times = preload("res://objects/object_vars.gd").interaction_ti
 # Movement
 const SPEED = 100
 onready var navigation = get_node("/root/world/navigation")
-onready var tilemap = navigation.get_node("tilemap")
+onready var tilemap = navigation.get_node("object_layer")
 var path
 enum {NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST}
 const MAX_CARDDIR = 7
@@ -44,18 +44,25 @@ var current_direction = NORTH
 
 onready var player = get_node("/root/world/player")
 onready var view = get_node("view")
+onready var sprite = get_node("AnimatedSprite")
 var last_player_pos = Vector2()
 
 
 func die():
 	dead = true
-	get_node("Sprite").set_modulate(Color(0, 0, 0))
 	change_state(DEAD)
 	set_collision_layer_bit(2, false)
 	set_collision_layer_bit(3, true)
 	set_collision_mask_bit(0, false)
 	set_z_index(-1)
 	set_process(false)
+	sprite.play("dying")
+	sprite.connect("animation_finished", self, "death_anim_finished")
+
+
+func death_anim_finished():
+	sprite.stop()
+	sprite.set_frame(3)
 
 
 func is_dead():
@@ -106,12 +113,19 @@ func _process(delta):
 		var walk_distance = SPEED * delta
 		if not (status == HUNTING or status == ALARMED and get_global_position().distance_to(player.get_global_position()) < 200):
 			move(walk_distance)
+			if not sprite.is_playing():
+				sprite.play()
 		elif status == HUNTING:
 			var dtp = (player.get_global_position() - get_global_position()).normalized()
 			rotate_to_vdir(dtp)
+			sprite.stop()
+			sprite.set_frame(0)
 		if not (status == HUNTING or status == ALARMED):
 			change_state(MOVING)
 	else:
+		if not status == POSSESSED:
+			sprite.stop()
+			sprite.set_frame(0)
 		if int_tile and not status == INTERACTING:
 			# TODO: randomize this
 			time_to_interact = interaction_times[int_object]
@@ -175,6 +189,17 @@ func rotate_to_direction(dir):
 		dir = MAX_CARDDIR + dir
 	elif dir > MAX_CARDDIR:
 		dir = dir - MAX_CARDDIR
+
+	sprite.set_flip_h(false)
+	if dir == NORTH:
+		sprite.set_animation("walk_up")
+	elif dir == EAST:
+		sprite.set_animation("walk_right")
+	elif dir == SOUTH:
+		sprite.set_animation("walk_down")
+	elif dir == WEST:
+		sprite.set_flip_h(true)
+		sprite.set_animation("walk_right")
 
 	# WTF why is this being converted to a string???.
 	var rot = directions_dict[int(dir)]
