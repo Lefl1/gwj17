@@ -9,7 +9,7 @@ extents = Vector2( 32, 16 )
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 32, 32 )
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id=3]
 resource_name = "Walk Down"
 loop = true
 tracks/0/type = "value"
@@ -65,8 +65,7 @@ tracks/1/keys = {
 "values": [ 0.0, -5.0, 0.0, 5.0, 0.0 ]
 }
 
-[sub_resource type="Animation" id=3]
-resource_name = "Walk R"
+[sub_resource type="Animation" id=5]
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Sprite:region_rect")
@@ -179,9 +178,9 @@ align = 1
 valign = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-"anims/Walk Down" = SubResource( 5 )
+"anims/Walk Down" = SubResource( 3 )
 "anims/Walk L" = SubResource( 4 )
-"anims/Walk R" = SubResource( 3 )
+"anims/Walk R" = SubResource( 5 )
 "anims/Walk Up" = SubResource( 6 )
 anims/death = SubResource( 7 )
 
