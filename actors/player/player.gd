@@ -21,6 +21,8 @@ const LUNGE_COOLDOWN_TIME = 2
 var lunge_cooldown = LUNGE_COOLDOWN_TIME
 
 var host
+const MAX_HEALTH = 3
+var health = MAX_HEALTH
 
 func _physics_process(delta):
 	if not is_input_blocked:
@@ -45,6 +47,7 @@ func lunge(dir = null):
 		lunge_dir = dir
 	else:
 		lunge_dir = get_input_dir()
+	rotate_to_dir(lunge_dir)
 	is_input_blocked = true
 
 
@@ -58,6 +61,7 @@ func lunge_move(delta):
 		print("hit something")
 		stop_lunge()
 		if col.collider.is_in_group("crew"):
+			get_node("/root/world/possess").play()
 			host = col.collider
 			host.change_state(host.POSSESSED)
 			get_node("col").set_disabled(true)
@@ -70,7 +74,9 @@ func stop_lunge():
 	is_lunging = false
 	lunge_time = 0
 	lunge_cooldown = 0
+	get_node("col").set_disabled(false)
 	set_collision_mask_bit(2, true)
+	print(get_collision_mask_bit(2))
 	is_input_blocked = false
 
 
@@ -80,16 +86,25 @@ func release_host():
 	var htform = host.get_global_transform()
 	set_global_transform(htform)
 	lunge()
-	print("STARTED TO LUNGE")
-	print(is_lunging)
-	host.change_state(host.STUNNED)
+	if not host.status == host.DEAD:
+		host.change_state(host.STUNNED)
 	host = null
 	get_node("col").set_disabled(false)
+	print(get_node("col").is_disabled())
 	set_visible(true)
+
+
+func release_host_proxy():
+	release_host()
 
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
+		if event.scancode == KEY_SPACE and Input.is_key_pressed(KEY_SHIFT):
+			if host and not is_input_blocked:
+				release_host()
+			elif not is_input_blocked:
+				lunge()
 		if event.scancode == KEY_SPACE:
 			if is_input_blocked:
 				return
@@ -97,14 +112,11 @@ func _input(event):
 				print("Stabby time")
 				if host:
 					find_first_crew(host.get_node("view/front").get_overlapping_bodies()).die()
+					host.is_suspicious = true
 				else:
 					find_first_crew(get_node("front").get_overlapping_bodies()).die()
 			elif host and door_infront():
-				door_infront().toggle()
-			elif not is_behind_crew() and host and not is_input_blocked:
-				release_host()
-			elif not is_input_blocked:
-				lunge()
+				door_infront().toggle(host.role)
 
 
 func door_infront():
@@ -126,8 +138,10 @@ func is_behind_crew():
 		bodies = host.get_node("view/front").get_overlapping_bodies()
 	else:
 		bodies = get_node("front").get_overlapping_bodies()
-		
+	
+	print(bodies)
 	for body in bodies:
+		print(body.get_name())
 		if body == host:
 			continue
 		if body.is_in_group("crew"):
@@ -147,10 +161,14 @@ func move(delta):
 			host.sprite.stop()
 			host.sprite.set_frame(0)
 		host.move_and_slide(dir.normalized() * SPEED)
+		set_global_position(host.get_global_position())
 	else:
 		get_node("front").look_at(get_global_position() + dir)
 		move_and_slide(dir * SPEED)
 
+
+func rotate_to_dir(dir):
+	get_node("front").look_at(get_global_position() + dir)
 
 func get_rotation_from_dir(dir):
 	var cardinal_margin = 0.2
@@ -178,6 +196,7 @@ func get_rotation_from_dir(dir):
 
 	return direction
 
+
 func get_input_dir():
 	if is_input_blocked:
 		return
@@ -192,3 +211,9 @@ func get_input_dir():
 	if Input.is_key_pressed(KEY_S):
 		dir.y += 1
 	return dir.normalized()
+
+
+func get_hit():
+	health -= 1
+	if health <= 0:
+		print("IM DEAD")
