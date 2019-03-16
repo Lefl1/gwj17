@@ -13,10 +13,11 @@ func _ready():
 	col = get_node("col")
 	print(sprites)
 
-func toggle():
-	is_closed = !is_closed
-	print(is_closed)
-	set_type()
+func toggle(crew_type):
+	if crew_type == type:
+		is_closed = !is_closed
+		print(is_closed)
+		set_type()
 
 
 func set_type(t = null):
