@@ -36,19 +36,49 @@ const directions_dict = {
 	SOUTH: 180, SOUTHWEST: 225,
 	WEST: 270, NORTHWEST: 315}
 const cardinal_margin = 0.2
-const MAX_TURN_TIME = 0.5
+const MAX_TURN_TIME = .5
 var turn_time = 0
 var turns = 0
-var turn_dir = 1
+var turn_dir = null
 var current_direction = NORTH
 
 onready var player = get_node("/root/world/player")
 onready var view = get_node("view")
-onready var sprite = get_node("AnimatedSprite")
+var sprite
 var last_player_pos = Vector2()
+onready var fire_node_r = get_node("firing_r")
+onready var fire_node_l = get_node("firing_l")
+var current_fire_position
+
+var fire_time = 0
+const MAX_FIRE_TIME = 2
+
+onready var sound_area = get_node("sound_area")
+const BULLET_RES = preload("res://objects/bullet.tscn")
+var alert_pos
+var is_suspicious = false
+var suspicious_time = 0
+const MAX_SUSPICIOUS_TIME = 2.5
+
+func _ready():
+	if role == 0:
+		sprite = get_node("blue")
+	elif role == 1:
+		sprite = get_node("yellow")
+	elif role == 2:
+		sprite = get_node("red")
+	sprite.set_visible(true)
+
+
+func get_hit():
+	if status == POSSESSED:
+		if player.host:
+			player.release_host_proxy()
 
 
 func die():
+	alert_crew()
+	get_node("/root/world/crew_death").play()
 	dead = true
 	change_state(DEAD)
 	set_collision_layer_bit(2, false)
@@ -72,21 +102,34 @@ func is_dead():
 func change_state(state):
 	if status == DEAD:
 		return
-	status = state
+	if not ((status == HUNTING and state == ALARMED) or (status == POSSESSED and state == ALARMED)):
+		status = state
 	if state == IDLE or state == HUNTING or state == STUNNED or state == POSSESSED or state == DEAD or state == ALARMED:
 		reset_interact_vars()
-	get_node("status").set_text("STATUS: %s" % status)
-	if state == ALARMED:
-		path = null
+	if state == STUNNED:
+		sprite.set_frame(0)
+		sprite.stop()
+
+	get_node("ColorRect/status").set_text("STATUS: %s" % status)
+
 
 func _on_view_body_entered(body):
+	#print(body.get_name())
+	if status == POSSESSED:
+		return
 	# If we se a dead body, be alarmed bout it if we have not seen it before
-	if body.is_in_group("crew") and body.is_dead():
+	if body.is_in_group("crew") and body.is_dead() and has_line_of_sight(body) and not (status == STUNNED or status == POSSESSED):
 		if body == self:
 			return
 		if not body in known_casualties:
 			change_state(ALARMED)
+			alert_crew()
 			known_casualties.append(body)
+
+	elif body.is_in_group("crew") and body.is_suspicious:
+		if has_line_of_sight(body):
+			change_state(HUNTING)
+			_update_navigation_path(get_global_position(), body.get_global_position())
 
 	elif body.is_in_group("player") and not body.host and not (status == STUNNED or status == POSSESSED):
 		if has_line_of_sight(body):
@@ -117,7 +160,8 @@ func _process(delta):
 				sprite.play()
 		elif status == HUNTING:
 			var dtp = (player.get_global_position() - get_global_position()).normalized()
-			rotate_to_vdir(dtp)
+			if turn_dir == null:
+				rotate_to_vdir(dtp)
 			sprite.stop()
 			sprite.set_frame(0)
 		if not (status == HUNTING or status == ALARMED):
@@ -137,7 +181,7 @@ func _process(delta):
 	var dir = (current_position -last_position).normalized()
 
 	var cardinal_dir = get_rotation_from_dir(dir)
-	if dir:
+	if dir and turn_dir == null:
 		rotate_to_direction(cardinal_dir)
 	elif status == INTERACTING:
 		rotate_to_direction(NORTH)
@@ -154,10 +198,11 @@ func _process(delta):
 
 	elif status == HUNTING:
 		var bodies = view.get_overlapping_bodies()
-		if player in bodies and not player.host:
-			_update_navigation_path(get_global_position(), player.get_global_position())
-			turn_time = 0
-			turns = 0
+		if (player in bodies) or (player.host in bodies):
+			if has_line_of_sight(player) or has_line_of_sight(player.host):
+				_update_navigation_path(get_global_position(), player.get_global_position())
+				turn_time = 0
+				turns = 0
 		else:
 			if turn_time >= MAX_TURN_TIME:
 				turn_time = 0
@@ -167,9 +212,22 @@ func _process(delta):
 					turn_dir = sign(dtp.dot(right))
 				rotate_to_direction(current_direction + turn_dir)
 				turns += 1
-				if turns >= 4:
+				if turns >= 8:
+					turn_dir = null
 					turns = 0
 					change_state(IDLE)
+
+
+	if is_suspicious:
+		suspicious_time += delta
+		if suspicious_time >= MAX_SUSPICIOUS_TIME:
+			is_suspicious = false
+
+
+	fire_time += delta
+	if status == HUNTING and fire_time >= MAX_FIRE_TIME:
+		fire_time = 0
+		fire()
 
 	turn_time += delta
 	if status == ALARMED:
@@ -178,6 +236,30 @@ func _process(delta):
 			alarmed_time = 0
 			change_state(IDLE)
 
+
+func alert(pos):
+	alert_pos = pos
+	var dir = (pos - get_global_position()).normalized()
+	rotate_to_vdir(dir)
+	change_state(ALARMED)
+
+func alert_crew():
+	var bodies = sound_area.get_overlapping_bodies()
+	for body in bodies:
+		if body.is_in_group("crew") and not body == self:
+			body.alert(get_global_position())
+
+
+func fire():
+	var bodies = view.get_overlapping_bodies()
+	if ((player in bodies) or (player.host in bodies)) and (has_line_of_sight(player) or has_line_of_sight(player.host)):
+		var bullet = BULLET_RES.instance()
+		var b_pos = current_fire_position.get_global_position()
+		var m_dir = (player.get_global_position() - b_pos).normalized()
+		bullet.move_dir = m_dir
+		bullet.set_global_position(b_pos + m_dir * 20)
+		bullet.source = self
+		get_node("/root/world").add_child(bullet)
 
 func rotate_to_vdir(vdir):
 	var cdir = get_rotation_from_dir(vdir)
@@ -192,12 +274,16 @@ func rotate_to_direction(dir):
 
 	sprite.set_flip_h(false)
 	if dir == NORTH:
+		current_fire_position = fire_node_r
 		sprite.set_animation("walk_up")
 	elif dir == EAST:
+		current_fire_position = fire_node_r
 		sprite.set_animation("walk_right")
 	elif dir == SOUTH:
+		current_fire_position = fire_node_r
 		sprite.set_animation("walk_down")
 	elif dir == WEST:
+		current_fire_position = fire_node_l
 		sprite.set_flip_h(true)
 		sprite.set_animation("walk_right")
 
@@ -208,30 +294,49 @@ func rotate_to_direction(dir):
 
 
 func get_rotation_from_dir(dir):
-	var cardinal_margin = 0.2
-	var direction = 0
-
-	if dir.y > 0 and dir.y > cardinal_margin:
-		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
-			direction = SOUTH
-		elif dir.x > cardinal_margin:
-			direction = SOUTHEAST
-		elif dir.x < -cardinal_margin:
-			direction = SOUTHWEST
-
-	elif dir.y < 0 and dir.y < -cardinal_margin:
-		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+	var direction = SOUTH
+	if abs(dir.x) > abs(dir.y):
+		if dir.x > 0:
+			direction = EAST
+		else:
+			direction = WEST
+	elif abs(dir.x) < abs(dir.y):
+		if dir.y < 0:
 			direction = NORTH
-		elif dir.x > cardinal_margin:
-			direction = NORTHEAST
-		elif dir.x < -cardinal_margin:
-			direction = NORTHWEST
-	elif dir.x > 0:
-		direction = EAST
-	elif dir.x < 0:
-		direction = WEST
-
+		else:
+			direction = SOUTH
+	elif abs(dir.x) == abs(dir.y):
+		if dir.y > 0:
+			direction = SOUTH
+		else:
+			direction = NORTH
+	
 	return direction
+
+#	var cardinal_margin = 0.2
+#	var direction = 0
+#
+#	if dir.y > 0 and dir.y > cardinal_margin:
+#		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+#			direction = SOUTH
+#		elif dir.x > cardinal_margin:
+#			direction = SOUTHEAST
+#		elif dir.x < -cardinal_margin:
+#			direction = SOUTHWEST
+#
+#	elif dir.y < 0 and dir.y < -cardinal_margin:
+#		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+#			direction = NORTH
+#		elif dir.x > cardinal_margin:
+#			direction = NORTHEAST
+#		elif dir.x < -cardinal_margin:
+#			direction = NORTHWEST
+#	elif dir.x > 0:
+#		direction = EAST
+#	elif dir.x < 0:
+#		direction = WEST
+
+
 
 
 func get_interaction_tile():
@@ -256,10 +361,9 @@ func find_closest_interaction_tile():
 				interaction_tiles.erase(tile)
 
 		if not interaction_tiles.empty():
-			var current_position = tilemap.world_to_map(get_position())
+			var current_position = get_global_position()
 			var best_tile
 			var bd
-
 			for tile in interaction_tiles:
 				# If the tile is currently in use by another npc we can not use it.
 				if tile in tilemap.tiles_in_use:
@@ -267,14 +371,18 @@ func find_closest_interaction_tile():
 
 				# If best tile_is null choose the first that is available
 				if not best_tile:
+					print("BEST TILE")
 					best_tile = tile
-					bd = current_position.distance_to(best_tile)
+					var p = navigation.get_simple_path(current_position, tilemap.map_to_world(best_tile), true)
+					bd = get_path_distance(p)
 					continue
 				else:
-					var d = current_position.distance_to(best_tile)
-					best_tile = tile
-					bd = d
-
+					var p = navigation.get_simple_path(current_position, tilemap.map_to_world(tile), true)
+					var d = get_path_distance(p)
+					if d < bd:
+						best_tile = tile
+						bd = d
+			print(best_tile)
 			return best_tile
 		return
 
@@ -309,6 +417,8 @@ func move(distance):
 
 
 func has_line_of_sight(entity):
+	if not is_instance_valid(entity):
+		return false
 	var cpos = get_global_position()
 	var epos = entity.get_global_position()
 	var res = cast_ray(cpos, epos)
@@ -321,7 +431,17 @@ func cast_ray(from, to):
 	return space_state.intersect_ray(from, to, [self.get_rid()])
 
 
+func get_path_distance(path_array):
+	print(path_array)
+	var distance = 0
+	var p_point = path_array[0]
+	for point in path_array:
+		distance += p_point.distance_to(point)
+		p_point = point
+	return distance
+
 func _update_navigation_path(from, to):
 	path = navigation.get_simple_path(from, to, true)
+	print(path)
 	path[path.size() - 1] = to
 	path.remove(0)
