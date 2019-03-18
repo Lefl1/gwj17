@@ -110,11 +110,10 @@ func change_state(state):
 		sprite.set_frame(0)
 		sprite.stop()
 
-	get_node("ColorRect/status").set_text("STATUS: %s" % status)
+
 
 
 func _on_view_body_entered(body):
-	#print(body.get_name())
 	if status == POSSESSED:
 		return
 	# If we se a dead body, be alarmed bout it if we have not seen it before
@@ -371,7 +370,6 @@ func find_closest_interaction_tile():
 
 				# If best tile_is null choose the first that is available
 				if not best_tile:
-					print("BEST TILE")
 					best_tile = tile
 					var p = navigation.get_simple_path(current_position, tilemap.map_to_world(best_tile), true)
 					bd = get_path_distance(p)
@@ -382,7 +380,6 @@ func find_closest_interaction_tile():
 					if d < bd:
 						best_tile = tile
 						bd = d
-			print(best_tile)
 			return best_tile
 		return
 
@@ -432,7 +429,6 @@ func cast_ray(from, to):
 
 
 func get_path_distance(path_array):
-	print(path_array)
 	var distance = 0
 	var p_point = path_array[0]
 	for point in path_array:
@@ -442,6 +438,5 @@ func get_path_distance(path_array):
 
 func _update_navigation_path(from, to):
 	path = navigation.get_simple_path(from, to, true)
-	print(path)
 	path[path.size() - 1] = to
 	path.remove(0)

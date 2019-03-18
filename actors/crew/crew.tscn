@@ -1,32 +1,32 @@
 [gd_scene load_steps=34 format=2]
 
 [ext_resource path="res://actors/crew/crew.gd" type="Script" id=1]
-[ext_resource path="res://textures/crew/blue/right_idle.png" type="Texture" id=2]
-[ext_resource path="res://textures/crew/blue/right_walk_0.png" type="Texture" id=3]
-[ext_resource path="res://textures/crew/blue/right_walk_1.png" type="Texture" id=4]
-[ext_resource path="res://textures/crew/blue/rear_idle.png" type="Texture" id=5]
-[ext_resource path="res://textures/crew/blue/rear_walk_0.png" type="Texture" id=6]
-[ext_resource path="res://textures/crew/blue/rear_walk_1.png" type="Texture" id=7]
-[ext_resource path="res://textures/crew/blue/dying_0.png" type="Texture" id=8]
-[ext_resource path="res://textures/crew/blue/dying_1.png" type="Texture" id=9]
-[ext_resource path="res://textures/crew/blue/dying_2.png" type="Texture" id=10]
-[ext_resource path="res://textures/crew/blue/dying_3.png" type="Texture" id=11]
-[ext_resource path="res://textures/crew/blue/front_idle.png" type="Texture" id=12]
-[ext_resource path="res://textures/crew/blue/front_walk_0.png" type="Texture" id=13]
-[ext_resource path="res://textures/crew/blue/front_walk_1.png" type="Texture" id=14]
-[ext_resource path="res://textures/crew/yellow/right_idle.png" type="Texture" id=15]
-[ext_resource path="res://textures/crew/yellow/right_walk_0.png" type="Texture" id=16]
-[ext_resource path="res://textures/crew/yellow/right_walk_1.png" type="Texture" id=17]
-[ext_resource path="res://textures/crew/yellow/rear_idle.png" type="Texture" id=18]
-[ext_resource path="res://textures/crew/yellow/rear_walk_0.png" type="Texture" id=19]
-[ext_resource path="res://textures/crew/yellow/rear_walk_1.png" type="Texture" id=20]
-[ext_resource path="res://textures/crew/yellow/dying_0.png" type="Texture" id=21]
-[ext_resource path="res://textures/crew/yellow/dying_1.png" type="Texture" id=22]
-[ext_resource path="res://textures/crew/yellow/dying_2.png" type="Texture" id=23]
-[ext_resource path="res://textures/crew/yellow/dying_3.png" type="Texture" id=24]
-[ext_resource path="res://textures/crew/yellow/front_idle.png" type="Texture" id=25]
-[ext_resource path="res://textures/crew/yellow/front_walk_0.png" type="Texture" id=26]
-[ext_resource path="res://textures/crew/yellow/front_walk_1.png" type="Texture" id=27]
+[ext_resource path="res://textures/crew/blue/front_idle.png" type="Texture" id=2]
+[ext_resource path="res://textures/crew/blue/front_walk_0.png" type="Texture" id=3]
+[ext_resource path="res://textures/crew/blue/front_walk_1.png" type="Texture" id=4]
+[ext_resource path="res://textures/crew/blue/right_idle.png" type="Texture" id=5]
+[ext_resource path="res://textures/crew/blue/right_walk_0.png" type="Texture" id=6]
+[ext_resource path="res://textures/crew/blue/right_walk_1.png" type="Texture" id=7]
+[ext_resource path="res://textures/crew/blue/rear_idle.png" type="Texture" id=8]
+[ext_resource path="res://textures/crew/blue/rear_walk_0.png" type="Texture" id=9]
+[ext_resource path="res://textures/crew/blue/rear_walk_1.png" type="Texture" id=10]
+[ext_resource path="res://textures/crew/blue/dying_0.png" type="Texture" id=11]
+[ext_resource path="res://textures/crew/blue/dying_1.png" type="Texture" id=12]
+[ext_resource path="res://textures/crew/blue/dying_2.png" type="Texture" id=13]
+[ext_resource path="res://textures/crew/blue/dying_3.png" type="Texture" id=14]
+[ext_resource path="res://textures/crew/yellow/front_idle.png" type="Texture" id=15]
+[ext_resource path="res://textures/crew/yellow/front_walk_0.png" type="Texture" id=16]
+[ext_resource path="res://textures/crew/yellow/front_walk_1.png" type="Texture" id=17]
+[ext_resource path="res://textures/crew/yellow/right_idle.png" type="Texture" id=18]
+[ext_resource path="res://textures/crew/yellow/right_walk_0.png" type="Texture" id=19]
+[ext_resource path="res://textures/crew/yellow/right_walk_1.png" type="Texture" id=20]
+[ext_resource path="res://textures/crew/yellow/rear_idle.png" type="Texture" id=21]
+[ext_resource path="res://textures/crew/yellow/rear_walk_0.png" type="Texture" id=22]
+[ext_resource path="res://textures/crew/yellow/rear_walk_1.png" type="Texture" id=23]
+[ext_resource path="res://textures/crew/yellow/dying_0.png" type="Texture" id=24]
+[ext_resource path="res://textures/crew/yellow/dying_1.png" type="Texture" id=25]
+[ext_resource path="res://textures/crew/yellow/dying_2.png" type="Texture" id=26]
+[ext_resource path="res://textures/crew/yellow/dying_3.png" type="Texture" id=27]
 [ext_resource path="res://textures/crew/red/animations.tres" type="SpriteFrames" id=28]
 
 [sub_resource type="RectangleShape2D" id=1]
@@ -39,22 +39,22 @@ radius = 24.0
 animations = [ {
 "frames": [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ],
 "loop": true,
-"name": "walk_right",
+"name": "walk_down",
 "speed": 4.0
 }, {
 "frames": [ ExtResource( 5 ), ExtResource( 6 ), ExtResource( 7 ) ],
 "loop": true,
+"name": "walk_right",
+"speed": 4.0
+}, {
+"frames": [ ExtResource( 8 ), ExtResource( 9 ), ExtResource( 10 ) ],
+"loop": true,
 "name": "walk_up",
 "speed": 4.0
 }, {
-"frames": [ ExtResource( 8 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 11 ) ],
+"frames": [ ExtResource( 11 ), ExtResource( 12 ), ExtResource( 13 ), ExtResource( 14 ) ],
 "loop": true,
 "name": "dying",
-"speed": 4.0
-}, {
-"frames": [ ExtResource( 12 ), ExtResource( 13 ), ExtResource( 14 ) ],
-"loop": true,
-"name": "walk_down",
 "speed": 4.0
 } ]
 
@@ -62,22 +62,22 @@ animations = [ {
 animations = [ {
 "frames": [ ExtResource( 15 ), ExtResource( 16 ), ExtResource( 17 ) ],
 "loop": true,
+"name": "walk_down",
+"speed": 4.0
+}, {
+"frames": [ ExtResource( 18 ), ExtResource( 19 ), ExtResource( 20 ) ],
+"loop": true,
 "name": "walk_right",
 "speed": 5.0
 }, {
-"frames": [ ExtResource( 18 ), ExtResource( 19 ), ExtResource( 20 ) ],
+"frames": [ ExtResource( 21 ), ExtResource( 22 ), ExtResource( 23 ) ],
 "loop": true,
 "name": "walk_up",
 "speed": 4.0
 }, {
-"frames": [ ExtResource( 21 ), ExtResource( 22 ), ExtResource( 23 ), ExtResource( 24 ) ],
+"frames": [ ExtResource( 24 ), ExtResource( 25 ), ExtResource( 26 ), ExtResource( 27 ) ],
 "loop": true,
 "name": "dying",
-"speed": 4.0
-}, {
-"frames": [ ExtResource( 25 ), ExtResource( 26 ), ExtResource( 27 ) ],
-"loop": true,
-"name": "walk_down",
 "speed": 4.0
 } ]
 
@@ -135,20 +135,6 @@ frames = ExtResource( 28 )
 animation = "walk_right"
 offset = Vector2( 20, -70 )
 flip_h = true
-
-[node name="ColorRect" type="ColorRect" parent="."]
-margin_left = -34.3419
-margin_top = -46.238
-margin_right = 56.6581
-margin_bottom = -30.238
-color = Color( 0, 0, 0, 1 )
-
-[node name="status" type="Label" parent="ColorRect"]
-margin_right = 47.0
-margin_bottom = 14.0
-text = "STATUS"
-align = 1
-valign = 1
 
 [node name="firing_l" type="Position2D" parent="."]
 position = Vector2( -22, -15 )

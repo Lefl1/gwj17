@@ -23,6 +23,8 @@ var lunge_cooldown = LUNGE_COOLDOWN_TIME
 var host
 const MAX_HEALTH = 3
 var health = MAX_HEALTH
+onready var sprite = get_node("sprites")
+var current_direction = 0
 
 func _physics_process(delta):
 	if not is_input_blocked:
@@ -36,6 +38,15 @@ func _physics_process(delta):
 			stop_lunge()
 		lunge_cooldown += delta
 
+
+func _process(delta):
+	var storage = get_node("/root/world/storage")
+	var bridge = get_node("/root/world/bridge")
+	var tworooms = get_node("/root/world/tworooms")
+	var room_before_bridge = get_node("/root/world/room_before_bridge")
+	if storage.get_child_count() == 0 and bridge.get_child_count() == 0 and tworooms.get_child_count() == 0 and room_before_bridge.get_child_count() == 0:
+		get_tree().change_scene("res://scenes/successs.tscn")
+	
 
 
 func lunge(dir = null):
@@ -152,6 +163,11 @@ func is_behind_crew():
 
 func move(delta):
 	var dir = get_input_dir()
+	if not dir == Vector2.ZERO and not sprite.is_playing():
+		sprite.play()
+	else:
+		sprite.set_frame(0)
+		sprite.stop()
 	if host:
 		if dir != Vector2.ZERO:
 			host.rotate_to_vdir(dir)
@@ -164,36 +180,56 @@ func move(delta):
 		set_global_position(host.get_global_position())
 	else:
 		get_node("front").look_at(get_global_position() + dir)
+		rotate_to_dir(dir)
 		move_and_slide(dir * SPEED)
 
 
 func rotate_to_dir(dir):
 	get_node("front").look_at(get_global_position() + dir)
+	var d = get_rotation_from_dir(dir)
+	rotate_to_direction(d)
+
+
+func rotate_to_direction(dir):
+	if dir < 0:
+		dir = MAX_CARDDIR + dir
+	elif dir > MAX_CARDDIR:
+		dir = dir - MAX_CARDDIR
+
+	sprite.set_flip_h(false)
+#	if dir == NORTH:
+#		sprite.set_animation("walk_up")
+	if dir == EAST:
+		sprite.set_animation("walk_right")
+#	elif dir == SOUTH:
+#		sprite.set_animation("walk_down")
+	elif dir == WEST:
+		sprite.set_flip_h(true)
+		sprite.set_animation("walk_right")
+
+	# WTF why is this being converted to a string???.
+	var rot = directions_dict[int(dir)]
+	current_direction = dir
+
 
 func get_rotation_from_dir(dir):
-	var cardinal_margin = 0.2
-	var direction = 0
-
-	if dir.y > 0 and dir.y > cardinal_margin:
-		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
-			direction = SOUTH
-		elif dir.x > cardinal_margin:
-			direction = SOUTHEAST
-		elif dir.x < -cardinal_margin:
-			direction = SOUTHWEST
-
-	elif dir.y < 0 and dir.y < -cardinal_margin:
-		if dir.x < cardinal_margin and dir.x > -cardinal_margin:
+	var direction
+	if abs(dir.x) > abs(dir.y):
+		if dir.x > 0:
+			direction = EAST
+		else:
+			direction = WEST
+	elif abs(dir.x) < abs(dir.y):
+		if dir.y < 0:
 			direction = NORTH
-		elif dir.x > cardinal_margin:
-			direction = NORTHEAST
-		elif dir.x < -cardinal_margin:
-			direction = NORTHWEST
-	elif dir.x > 0:
-		direction = EAST
-	elif dir.x < 0:
-		direction = WEST
-
+		else:
+			direction = SOUTH
+	elif abs(dir.x) == abs(dir.y):
+		if dir.y > 0:
+			direction = SOUTH
+		else:
+			direction = NORTH
+	
 	return direction
 
 
@@ -216,4 +252,4 @@ func get_input_dir():
 func get_hit():
 	health -= 1
 	if health <= 0:
-		print("IM DEAD")
+		get_tree().change_scene("res://scenes/death.tscn")
